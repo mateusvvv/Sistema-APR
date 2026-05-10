@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel admin - Sistema APR</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell admin-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Painel admin</p>
+          <h1>Histórico de APRs</h1>
+          <span>Registros finalizados em PDF</span>
+        </div>
+        <div class="header-actions">
+          <div class="menu-wrap">
+            <button type="button" class="menu-button" id="menuButton" aria-expanded="false" aria-controls="mainMenu">
+              Menu
+            </button>
+            <nav class="menu-panel" id="mainMenu" aria-label="Menu principal">
+              <a href="index.html">Home</a>
+              <a href="admin.html">Painel admin</a>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <section class="form-section login-panel" id="loginPanel">
+        <h2>Acesso restrito</h2>
+        <form id="loginForm" class="admin-login">
+          <label>
+            Usuário
+            <input type="email" name="email" value="sistemaapr@gmail.com" autocomplete="username" required />
+          </label>
+          <label>
+            Senha
+            <input type="password" name="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit" class="primary-button">Entrar</button>
+        </form>
+      </section>
+
+      <section class="form-section admin-panel" id="adminPanel" hidden>
+        <div class="section-heading">
+          <h2>APRs preenchidas</h2>
+          <button type="button" class="secondary-button" id="logoutButton">Sair</button>
+        </div>
+        <div class="admin-list" id="aprList"></div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script type="module" src="admin.js"></script>
+  </body>
+</html>

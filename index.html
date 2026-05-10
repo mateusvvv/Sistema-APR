@@ -14,7 +14,18 @@
           <h1>Análise Preliminar de Risco</h1>
           <span>APR - NR-10 / NR-35</span>
         </div>
-        <strong class="status-pill" id="statusPill">Pendente</strong>
+        <div class="header-actions">
+          <strong class="status-pill" id="statusPill">Pendente</strong>
+          <div class="menu-wrap">
+            <button type="button" class="menu-button" id="menuButton" aria-expanded="false" aria-controls="mainMenu">
+              Menu
+            </button>
+            <nav class="menu-panel" id="mainMenu" aria-label="Menu principal">
+              <a href="index.html">Home</a>
+              <a href="admin.html">Painel admin</a>
+            </nav>
+          </div>
+        </div>
       </header>
 
       <form id="aprForm" class="apr-form">
@@ -98,12 +109,12 @@
 
         <div class="action-bar">
           <button type="button" class="secondary-button" id="saveDraft">Salvar rascunho</button>
-          <button type="submit" class="primary-button">Finalizar APR</button>
+          <button type="submit" class="primary-button" id="submitApr">Finalizar APR</button>
         </div>
       </form>
     </main>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
   </body>
 </html>

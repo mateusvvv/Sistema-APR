@@ -51,6 +51,57 @@ textarea {
   box-shadow: 0 8px 22px rgba(12, 20, 28, 0.18);
 }
 
+.header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-wrap {
+  position: relative;
+}
+
+.menu-button {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.menu-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: none;
+  min-width: 170px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 16px 34px rgba(12, 20, 28, 0.22);
+}
+
+.menu-panel.open {
+  display: grid;
+}
+
+.menu-panel a {
+  padding: 12px 14px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.menu-panel a + a {
+  border-top: 1px solid var(--line);
+}
+
+.menu-panel a:hover,
+.menu-panel a:focus {
+  background: #f2f6f9;
+}
+
 .eyebrow {
   margin: 0 0 4px;
   color: #9cd7ff;
@@ -126,6 +177,8 @@ label {
 
 input[type='text'],
 input[type='date'],
+input[type='email'],
+input[type='password'],
 textarea {
   width: 100%;
   border: 1px solid var(--line);
@@ -134,6 +187,53 @@ textarea {
   background: #fbfcfd;
   color: var(--ink);
   outline: none;
+}
+
+.admin-shell {
+  padding-bottom: 24px;
+}
+
+.admin-login {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-panel[hidden],
+.login-panel[hidden] {
+  display: none;
+}
+
+.admin-list {
+  display: grid;
+  gap: 10px;
+}
+
+.apr-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fbfcfd;
+}
+
+.apr-card div {
+  display: grid;
+  gap: 4px;
+}
+
+.apr-card strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.apr-card span,
+.apr-card small,
+.empty-state {
+  color: var(--muted);
+  line-height: 1.35;
 }
 
 textarea {
@@ -281,6 +381,11 @@ button {
   font-weight: 800;
 }
 
+button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
 .ghost-button {
   border: 1px solid var(--line);
   background: #f6f8fa;
@@ -358,6 +463,31 @@ button {
   }
 }
 
+@media (max-width: 520px) {
+  .app-header {
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    flex-direction: column-reverse;
+    align-items: flex-end;
+  }
+
+  .status-pill,
+  .menu-button {
+    min-height: 38px;
+    padding: 8px 10px;
+  }
+
+  .apr-card {
+    grid-template-columns: 1fr;
+  }
+
+  .apr-card .primary-button {
+    width: 100%;
+  }
+}
+
 @media print {
   body {
     background: #fff;
@@ -366,6 +496,7 @@ button {
   .app-header,
   .action-bar,
   .ghost-button,
+  .menu-wrap,
   .toast {
     display: none;
   }

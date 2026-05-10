@@ -1,3 +1,6 @@
+import { addDoc, collection, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+import { db } from './firebase-config.js';
+
 const protectionItems = [
   'Capacete com jugular',
   'Calçado de segurança',
@@ -42,6 +45,9 @@ const statusPill = document.querySelector('#statusPill');
 const signaturePad = document.querySelector('#signaturePad');
 const signatureValue = document.querySelector('#signatureValue');
 const signatureContext = signaturePad.getContext('2d');
+const menuButton = document.querySelector('#menuButton');
+const mainMenu = document.querySelector('#mainMenu');
+const submitApr = document.querySelector('#submitApr');
 
 let isDrawing = false;
 let hasSignature = false;
@@ -101,6 +107,20 @@ function showToast(message) {
   toast.classList.add('show');
   window.clearTimeout(showToast.timeout);
   showToast.timeout = window.setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+function setupMenu() {
+  menuButton.addEventListener('click', () => {
+    const isOpen = mainMenu.classList.toggle('open');
+    menuButton.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.menu-wrap')) {
+      mainMenu.classList.remove('open');
+      menuButton.setAttribute('aria-expanded', 'false');
+    }
+  });
 }
 
 function setToday() {
@@ -221,6 +241,19 @@ function saveDraft() {
   showToast('Rascunho salvo neste aparelho.');
 }
 
+function saveLocalApr(apr, firebaseStatus) {
+  const localKey = `apr-finalizada-${apr.ordemServico || Date.now()}`;
+  localStorage.setItem(
+    localKey,
+    JSON.stringify({
+      ...apr,
+      firebaseStatus,
+      salvoLocalEm: new Date().toISOString(),
+    }),
+  );
+  return localKey;
+}
+
 function restoreDraft() {
   const draft = localStorage.getItem('apr-rascunho');
   if (!draft) return;
@@ -254,6 +287,17 @@ function restoreDraft() {
   }
 }
 
+async function saveFinalApr(apr) {
+  const localKey = saveLocalApr(apr, 'pendente');
+
+  await addDoc(collection(db, 'aprs'), {
+    ...apr,
+    criadoEm: serverTimestamp(),
+  });
+
+  saveLocalApr({ ...apr, localKey }, 'enviado');
+}
+
 document.querySelector('#markProtection').addEventListener('click', () => {
   protectionList.querySelectorAll('input').forEach((input) => {
     input.checked = true;
@@ -275,7 +319,7 @@ document.querySelector('#saveDraft').addEventListener('click', saveDraft);
 form.addEventListener('input', updateStatus);
 form.addEventListener('change', updateStatus);
 
-form.addEventListener('submit', (event) => {
+form.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   if (!form.reportValidity() || !validateRiskAnswers()) return;
@@ -285,15 +329,31 @@ form.addEventListener('submit', (event) => {
   }
 
   const apr = collectFormData();
-  localStorage.setItem(`apr-finalizada-${apr.ordemServico || Date.now()}`, JSON.stringify(apr));
-  localStorage.removeItem('apr-rascunho');
-  showToast('APR finalizada e salva neste aparelho.');
-  updateStatus();
+  submitApr.disabled = true;
+  submitApr.textContent = 'Enviando...';
+
+  try {
+    await saveFinalApr(apr);
+    localStorage.removeItem('apr-rascunho');
+    showToast('APR finalizada e enviada para o painel admin.');
+    form.reset();
+    clearSignature();
+    setToday();
+  } catch (error) {
+    console.error('Erro ao enviar APR para o Firebase:', error);
+    saveLocalApr(apr, 'erro');
+    showToast('APR salva no aparelho, mas o Firebase recusou o envio. Verifique as regras do Firestore.');
+  } finally {
+    submitApr.disabled = false;
+    submitApr.textContent = 'Finalizar APR';
+    updateStatus();
+  }
 });
 
 renderProtectionItems();
 renderQuestions();
 setupSignature();
+setupMenu();
 setToday();
 restoreDraft();
 updateStatus();
