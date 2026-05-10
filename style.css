@@ -372,6 +372,41 @@ input[type='radio'] {
   pointer-events: none;
 }
 
+.photo-box {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  overflow: hidden;
+  border: 1px dashed #9aa7b2;
+  border-radius: 8px;
+  background: #f6f8fa;
+}
+
+.photo-box video,
+.photo-box img {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  background: #101820;
+}
+
+.photo-placeholder {
+  padding: 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.photo-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 button {
   border: 0;
   border-radius: 7px;
@@ -496,6 +531,7 @@ button:disabled {
   .app-header,
   .action-bar,
   .ghost-button,
+  .photo-actions,
   .menu-wrap,
   .toast {
     display: none;

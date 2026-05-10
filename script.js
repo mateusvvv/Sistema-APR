@@ -48,9 +48,18 @@ const signatureContext = signaturePad.getContext('2d');
 const menuButton = document.querySelector('#menuButton');
 const mainMenu = document.querySelector('#mainMenu');
 const submitApr = document.querySelector('#submitApr');
+const startCameraButton = document.querySelector('#startCamera');
+const capturePhotoButton = document.querySelector('#capturePhoto');
+const retakePhotoButton = document.querySelector('#retakePhoto');
+const faceVideo = document.querySelector('#faceVideo');
+const faceCanvas = document.querySelector('#faceCanvas');
+const facePreview = document.querySelector('#facePreview');
+const facePhotoValue = document.querySelector('#facePhotoValue');
+const photoPlaceholder = document.querySelector('#photoPlaceholder');
 
 let isDrawing = false;
 let hasSignature = false;
+let cameraStream = null;
 
 function normalizeId(text) {
   return text
@@ -167,6 +176,72 @@ function clearSignature() {
   updateStatus();
 }
 
+function stopCamera() {
+  if (!cameraStream) return;
+  cameraStream.getTracks().forEach((track) => track.stop());
+  cameraStream = null;
+}
+
+async function startCamera() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    showToast('Câmera não disponível neste navegador.');
+    return;
+  }
+
+  try {
+    stopCamera();
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'user',
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+      },
+      audio: false,
+    });
+    faceVideo.srcObject = cameraStream;
+    await faceVideo.play();
+    faceVideo.hidden = false;
+    facePreview.hidden = true;
+    photoPlaceholder.hidden = true;
+    capturePhotoButton.disabled = false;
+    startCameraButton.textContent = 'Câmera aberta';
+  } catch {
+    showToast('Não foi possível acessar a câmera. Verifique a permissão do navegador.');
+  }
+}
+
+function capturePhoto() {
+  if (!cameraStream || !faceVideo.videoWidth) {
+    showToast('Abra a câmera antes de capturar a foto.');
+    return;
+  }
+
+  const context = faceCanvas.getContext('2d');
+  context.drawImage(faceVideo, 0, 0, faceCanvas.width, faceCanvas.height);
+  const photo = faceCanvas.toDataURL('image/jpeg', 0.82);
+  facePhotoValue.value = photo;
+  facePreview.src = photo;
+  facePreview.hidden = false;
+  faceVideo.hidden = true;
+  retakePhotoButton.hidden = false;
+  capturePhotoButton.disabled = true;
+  startCameraButton.textContent = 'Abrir câmera';
+  stopCamera();
+  updateStatus();
+}
+
+function clearPhoto() {
+  facePhotoValue.value = '';
+  facePreview.removeAttribute('src');
+  facePreview.hidden = true;
+  photoPlaceholder.hidden = false;
+  retakePhotoButton.hidden = true;
+  capturePhotoButton.disabled = true;
+  startCameraButton.textContent = 'Abrir câmera';
+  stopCamera();
+  updateStatus();
+}
+
 function setupSignature() {
   signatureContext.lineWidth = 3;
   signatureContext.lineCap = 'round';
@@ -196,6 +271,7 @@ function collectFormData() {
     })),
     confirmacao: data.get('confirmacao') === 'on',
     observacao: data.get('observacao'),
+    fotoExecutante: facePhotoValue.value,
     assinatura: hasSignature ? signaturePad.toDataURL('image/png') : '',
     atualizadoEm: new Date().toISOString(),
   };
@@ -282,6 +358,14 @@ function restoreDraft() {
     if (data.confirmacao) {
       form.elements.confirmacao.checked = true;
     }
+
+    if (data.fotoExecutante) {
+      facePhotoValue.value = data.fotoExecutante;
+      facePreview.src = data.fotoExecutante;
+      facePreview.hidden = false;
+      photoPlaceholder.hidden = true;
+      retakePhotoButton.hidden = false;
+    }
   } catch {
     localStorage.removeItem('apr-rascunho');
   }
@@ -315,6 +399,9 @@ document.querySelector('#markSafe').addEventListener('click', () => {
 });
 
 document.querySelector('#saveDraft').addEventListener('click', saveDraft);
+startCameraButton.addEventListener('click', startCamera);
+capturePhotoButton.addEventListener('click', capturePhoto);
+retakePhotoButton.addEventListener('click', clearPhoto);
 
 form.addEventListener('input', updateStatus);
 form.addEventListener('change', updateStatus);
@@ -325,6 +412,10 @@ form.addEventListener('submit', async (event) => {
   if (!form.reportValidity() || !validateRiskAnswers()) return;
   if (!hasSignature) {
     showToast('Assine a APR antes de finalizar.');
+    return;
+  }
+  if (!facePhotoValue.value) {
+    showToast('Tire a foto do executante antes de finalizar.');
     return;
   }
 
@@ -338,6 +429,7 @@ form.addEventListener('submit', async (event) => {
     showToast('APR finalizada e enviada para o painel admin.');
     form.reset();
     clearSignature();
+    clearPhoto();
     setToday();
   } catch (error) {
     console.error('Erro ao enviar APR para o Firebase:', error);
@@ -357,3 +449,4 @@ setupMenu();
 setToday();
 restoreDraft();
 updateStatus();
+window.addEventListener('pagehide', stopCamera);

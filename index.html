@@ -97,6 +97,24 @@
 
         <section class="form-section">
           <div class="section-heading">
+            <h2>Foto do executante</h2>
+            <button type="button" class="ghost-button" id="retakePhoto" hidden>Refazer</button>
+          </div>
+          <div class="photo-box" id="photoBox">
+            <video id="faceVideo" playsinline muted hidden></video>
+            <canvas id="faceCanvas" width="480" height="360" hidden></canvas>
+            <img id="facePreview" alt="Foto capturada do executante" hidden />
+            <div class="photo-placeholder" id="photoPlaceholder">Tire uma foto do rosto do executante</div>
+          </div>
+          <div class="photo-actions">
+            <button type="button" class="secondary-button" id="startCamera">Abrir câmera</button>
+            <button type="button" class="primary-button" id="capturePhoto" disabled>Capturar foto</button>
+          </div>
+          <input type="hidden" name="fotoExecutante" id="facePhotoValue" required />
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
             <h2>Assinatura</h2>
             <button type="button" class="ghost-button" id="clearSignature">Limpar</button>
           </div>

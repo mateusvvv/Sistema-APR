@@ -135,6 +135,15 @@ function generatePdf(apr) {
   doc.setFont('helvetica', 'normal');
   y = addWrappedText(doc, apr.observacao || '-', 14, y + 6, 180);
 
+  if (apr.fotoExecutante) {
+    y = ensureSpace(doc, y, 62);
+    y += 3;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Foto do executante', 14, y);
+    doc.addImage(apr.fotoExecutante, 'JPEG', 14, y + 5, 48, 36);
+    y += 45;
+  }
+
   if (apr.assinatura) {
     y = ensureSpace(doc, y, 45);
     doc.setFont('helvetica', 'bold');
