@@ -595,6 +595,14 @@ button:disabled {
   .extra-photo-grid {
     grid-template-columns: 1fr;
   }
+
+  .admin-shell {
+    min-height: 100vh;
+  }
+
+  .login-panel {
+    margin-top: 64px;
+  }
 }
 
 @media print {
