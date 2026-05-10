@@ -49,6 +49,7 @@ const menuButton = document.querySelector('#menuButton');
 const mainMenu = document.querySelector('#mainMenu');
 const submitApr = document.querySelector('#submitApr');
 const startCameraButton = document.querySelector('#startCamera');
+const switchCameraButton = document.querySelector('#switchCamera');
 const capturePhotoButton = document.querySelector('#capturePhoto');
 const retakePhotoButton = document.querySelector('#retakePhoto');
 const faceVideo = document.querySelector('#faceVideo');
@@ -64,6 +65,7 @@ let isDrawing = false;
 let hasSignature = false;
 let cameraStream = null;
 let cameraMode = 'main';
+let cameraFacingMode = 'user';
 let extraPhotos = [];
 
 function normalizeId(text) {
@@ -185,6 +187,11 @@ function stopCamera() {
   if (!cameraStream) return;
   cameraStream.getTracks().forEach((track) => track.stop());
   cameraStream = null;
+  switchCameraButton.disabled = true;
+}
+
+function updateSwitchCameraButton() {
+  switchCameraButton.textContent = cameraFacingMode === 'user' ? 'Usar câmera traseira' : 'Usar câmera frontal';
 }
 
 function renderExtraPhotos() {
@@ -211,7 +218,7 @@ async function startCamera(mode = 'main') {
     stopCamera();
     cameraStream = await navigator.mediaDevices.getUserMedia({
       video: {
-        facingMode: 'user',
+        facingMode: { ideal: cameraFacingMode },
         width: { ideal: 640 },
         height: { ideal: 480 },
       },
@@ -224,10 +231,21 @@ async function startCamera(mode = 'main') {
     facePreview.hidden = true;
     photoPlaceholder.hidden = true;
     capturePhotoButton.disabled = false;
+    switchCameraButton.disabled = false;
     capturePhotoButton.textContent = mode === 'extra' ? 'Capturar foto adicional' : 'Capturar foto';
     startCameraButton.textContent = 'Câmera aberta';
+    updateSwitchCameraButton();
   } catch {
     showToast('Não foi possível acessar a câmera. Verifique a permissão do navegador.');
+  }
+}
+
+function switchCamera() {
+  cameraFacingMode = cameraFacingMode === 'user' ? 'environment' : 'user';
+  updateSwitchCameraButton();
+
+  if (cameraStream) {
+    startCamera(cameraMode);
   }
 }
 
@@ -438,6 +456,7 @@ document.querySelector('#markSafe').addEventListener('click', () => {
 
 document.querySelector('#saveDraft').addEventListener('click', saveDraft);
 startCameraButton.addEventListener('click', () => startCamera('main'));
+switchCameraButton.addEventListener('click', switchCamera);
 capturePhotoButton.addEventListener('click', capturePhoto);
 retakePhotoButton.addEventListener('click', clearPhoto);
 addExtraPhotoButton.addEventListener('click', () => {
