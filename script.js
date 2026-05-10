@@ -56,10 +56,15 @@ const faceCanvas = document.querySelector('#faceCanvas');
 const facePreview = document.querySelector('#facePreview');
 const facePhotoValue = document.querySelector('#facePhotoValue');
 const photoPlaceholder = document.querySelector('#photoPlaceholder');
+const extraPhotoPanel = document.querySelector('#extraPhotoPanel');
+const extraPhotoGrid = document.querySelector('#extraPhotoGrid');
+const addExtraPhotoButton = document.querySelector('#addExtraPhoto');
 
 let isDrawing = false;
 let hasSignature = false;
 let cameraStream = null;
+let cameraMode = 'main';
+let extraPhotos = [];
 
 function normalizeId(text) {
   return text
@@ -182,7 +187,21 @@ function stopCamera() {
   cameraStream = null;
 }
 
-async function startCamera() {
+function renderExtraPhotos() {
+  extraPhotoPanel.hidden = !facePhotoValue.value && !extraPhotos.length;
+  extraPhotoGrid.innerHTML = extraPhotos
+    .map(
+      (photo, index) => `
+        <figure class="extra-photo-card">
+          <img src="${photo}" alt="Foto adicional ${index + 1}" />
+          <button type="button" class="ghost-button" data-remove-extra-photo="${index}">Remover</button>
+        </figure>
+      `,
+    )
+    .join('');
+}
+
+async function startCamera(mode = 'main') {
   if (!navigator.mediaDevices?.getUserMedia) {
     showToast('Câmera não disponível neste navegador.');
     return;
@@ -198,12 +217,14 @@ async function startCamera() {
       },
       audio: false,
     });
+    cameraMode = mode;
     faceVideo.srcObject = cameraStream;
     await faceVideo.play();
     faceVideo.hidden = false;
     facePreview.hidden = true;
     photoPlaceholder.hidden = true;
     capturePhotoButton.disabled = false;
+    capturePhotoButton.textContent = mode === 'extra' ? 'Capturar foto adicional' : 'Capturar foto';
     startCameraButton.textContent = 'Câmera aberta';
   } catch {
     showToast('Não foi possível acessar a câmera. Verifique a permissão do navegador.');
@@ -219,26 +240,39 @@ function capturePhoto() {
   const context = faceCanvas.getContext('2d');
   context.drawImage(faceVideo, 0, 0, faceCanvas.width, faceCanvas.height);
   const photo = faceCanvas.toDataURL('image/jpeg', 0.82);
-  facePhotoValue.value = photo;
-  facePreview.src = photo;
+
+  if (cameraMode === 'extra' && facePhotoValue.value) {
+    extraPhotos.push(photo);
+    showToast('Foto adicional adicionada.');
+  } else {
+    facePhotoValue.value = photo;
+    facePreview.src = photo;
+    retakePhotoButton.hidden = false;
+  }
+
   facePreview.hidden = false;
   faceVideo.hidden = true;
-  retakePhotoButton.hidden = false;
   capturePhotoButton.disabled = true;
+  capturePhotoButton.textContent = 'Capturar foto';
   startCameraButton.textContent = 'Abrir câmera';
   stopCamera();
+  renderExtraPhotos();
   updateStatus();
 }
 
 function clearPhoto() {
   facePhotoValue.value = '';
+  extraPhotos = [];
+  cameraMode = 'main';
   facePreview.removeAttribute('src');
   facePreview.hidden = true;
   photoPlaceholder.hidden = false;
   retakePhotoButton.hidden = true;
   capturePhotoButton.disabled = true;
+  capturePhotoButton.textContent = 'Capturar foto';
   startCameraButton.textContent = 'Abrir câmera';
   stopCamera();
+  renderExtraPhotos();
   updateStatus();
 }
 
@@ -272,6 +306,7 @@ function collectFormData() {
     confirmacao: data.get('confirmacao') === 'on',
     observacao: data.get('observacao'),
     fotoExecutante: facePhotoValue.value,
+    fotosAdicionais: extraPhotos,
     assinatura: hasSignature ? signaturePad.toDataURL('image/png') : '',
     atualizadoEm: new Date().toISOString(),
   };
@@ -366,6 +401,9 @@ function restoreDraft() {
       photoPlaceholder.hidden = true;
       retakePhotoButton.hidden = false;
     }
+
+    extraPhotos = Array.isArray(data.fotosAdicionais) ? data.fotosAdicionais : [];
+    renderExtraPhotos();
   } catch {
     localStorage.removeItem('apr-rascunho');
   }
@@ -399,9 +437,24 @@ document.querySelector('#markSafe').addEventListener('click', () => {
 });
 
 document.querySelector('#saveDraft').addEventListener('click', saveDraft);
-startCameraButton.addEventListener('click', startCamera);
+startCameraButton.addEventListener('click', () => startCamera('main'));
 capturePhotoButton.addEventListener('click', capturePhoto);
 retakePhotoButton.addEventListener('click', clearPhoto);
+addExtraPhotoButton.addEventListener('click', () => {
+  if (!facePhotoValue.value) {
+    showToast('Capture primeiro a foto do rosto do executante.');
+    return;
+  }
+  startCamera('extra');
+});
+
+extraPhotoGrid.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-remove-extra-photo]');
+  if (!button) return;
+  extraPhotos.splice(Number(button.dataset.removeExtraPhoto), 1);
+  renderExtraPhotos();
+  updateStatus();
+});
 
 form.addEventListener('input', updateStatus);
 form.addEventListener('change', updateStatus);

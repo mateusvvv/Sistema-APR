@@ -21,7 +21,7 @@
               Menu
             </button>
             <nav class="menu-panel" id="mainMenu" aria-label="Menu principal">
-              <a href="index.html">Home</a>
+              <a href="index.html">Início</a>
               <a href="admin.html">Painel admin</a>
             </nav>
           </div>
@@ -97,18 +97,31 @@
 
         <section class="form-section">
           <div class="section-heading">
-            <h2>Foto do executante</h2>
-            <button type="button" class="ghost-button" id="retakePhoto" hidden>Refazer</button>
+            <div>
+              <h2>Foto do executante</h2>
+              <p class="section-note">Capture o rosto do executante. Depois, adicione outras fotos se precisar registrar o local, ferramentas ou condições da atividade.</p>
+            </div>
+            <button type="button" class="ghost-button" id="retakePhoto" hidden>Refazer rosto</button>
           </div>
           <div class="photo-box" id="photoBox">
             <video id="faceVideo" playsinline muted hidden></video>
             <canvas id="faceCanvas" width="480" height="360" hidden></canvas>
             <img id="facePreview" alt="Foto capturada do executante" hidden />
-            <div class="photo-placeholder" id="photoPlaceholder">Tire uma foto do rosto do executante</div>
+            <div class="photo-placeholder" id="photoPlaceholder">
+              <strong>Nenhuma foto capturada</strong>
+              <span>Abra a câmera e enquadre bem o rosto do executante.</span>
+            </div>
           </div>
           <div class="photo-actions">
             <button type="button" class="secondary-button" id="startCamera">Abrir câmera</button>
             <button type="button" class="primary-button" id="capturePhoto" disabled>Capturar foto</button>
+          </div>
+          <div class="extra-photo-panel" id="extraPhotoPanel" hidden>
+            <div class="section-heading compact-heading">
+              <h3>Fotos adicionais <span>(opcional)</span></h3>
+              <button type="button" class="secondary-button" id="addExtraPhoto">Adicionar foto</button>
+            </div>
+            <div class="extra-photo-grid" id="extraPhotoGrid"></div>
           </div>
           <input type="hidden" name="fotoExecutante" id="facePhotoValue" required />
         </section>

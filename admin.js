@@ -144,6 +144,25 @@ function generatePdf(apr) {
     y += 45;
   }
 
+  if (Array.isArray(apr.fotosAdicionais) && apr.fotosAdicionais.length) {
+    y = ensureSpace(doc, y, 18);
+    y += 3;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Fotos adicionais', 14, y);
+    y += 7;
+
+    apr.fotosAdicionais.forEach((photo, index) => {
+      const column = index % 3;
+      if (column === 0) {
+        y = ensureSpace(doc, y, 43);
+      }
+      doc.addImage(photo, 'JPEG', 14 + column * 62, y, 48, 36);
+      if (column === 2 || index === apr.fotosAdicionais.length - 1) {
+        y += 41;
+      }
+    });
+  }
+
   if (apr.assinatura) {
     y = ensureSpace(doc, y, 45);
     doc.setFont('helvetica', 'bold');
