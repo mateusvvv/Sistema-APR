@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema APR</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Equipe externa</p>
+          <h1>Análise Preliminar de Risco</h1>
+          <span>APR - NR-10 / NR-35</span>
+        </div>
+        <strong class="status-pill" id="statusPill">Pendente</strong>
+      </header>
+
+      <form id="aprForm" class="apr-form">
+        <section class="form-section">
+          <h2>Identificação</h2>
+          <div class="field-grid">
+            <label>
+              Ordem de serviço
+              <input type="text" name="ordemServico" placeholder="Ex: 83557" required />
+            </label>
+            <label>
+              Data
+              <input type="date" name="data" required />
+            </label>
+            <label>
+              Responsável
+              <input type="text" name="responsavel" placeholder="Nome do executante" required />
+            </label>
+            <label>
+              Local da atividade
+              <input type="text" name="local" placeholder="Endereço ou ponto de referência" required />
+            </label>
+          </div>
+          <label>
+            Descrição da atividade
+            <textarea name="atividade" rows="3" placeholder="Descreva o serviço que será executado" required></textarea>
+          </label>
+        </section>
+
+        <section class="form-section">
+          <h2>Itens utilizados</h2>
+          <div class="choice-grid compact">
+            <label><input type="checkbox" name="itens" value="torre" /> Torre</label>
+            <label><input type="checkbox" name="itens" value="telhado" /> Telhado</label>
+            <label><input type="checkbox" name="itens" value="sinalizacao" /> Sinalização</label>
+            <label><input type="checkbox" name="itens" value="escada" /> Escada</label>
+            <label><input type="checkbox" name="itens" value="plataforma" /> Plataforma</label>
+            <label><input type="checkbox" name="itens" value="andaime" /> Andaime</label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <h2>EPI / EPC</h2>
+            <button type="button" class="ghost-button" id="markProtection">Marcar todos</button>
+          </div>
+          <div class="choice-grid" id="protectionList"></div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <h2>Ambiente de trabalho</h2>
+            <button type="button" class="ghost-button" id="markSafe">Preencher seguro</button>
+          </div>
+          <div class="question-list" id="questionList"></div>
+        </section>
+
+        <section class="form-section alert-section">
+          <h2>Condição para início</h2>
+          <label class="confirm-line">
+            <input type="checkbox" name="confirmacao" required />
+            Todos os campos foram checados pelo executante e atendem as normas de segurança.
+          </label>
+          <label>
+            Observação
+            <textarea name="observacao" rows="3" placeholder="Registre qualquer condição especial, bloqueio ou ajuste necessário"></textarea>
+          </label>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <h2>Assinatura</h2>
+            <button type="button" class="ghost-button" id="clearSignature">Limpar</button>
+          </div>
+          <div class="signature-box">
+            <canvas id="signaturePad" width="720" height="260" aria-label="Campo de assinatura"></canvas>
+            <span>Assine com o dedo</span>
+          </div>
+          <input type="hidden" name="assinatura" id="signatureValue" required />
+        </section>
+
+        <div class="action-bar">
+          <button type="button" class="secondary-button" id="saveDraft">Salvar rascunho</button>
+          <button type="submit" class="primary-button">Finalizar APR</button>
+        </div>
+      </form>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
